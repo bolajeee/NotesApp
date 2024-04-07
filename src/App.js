@@ -6,10 +6,33 @@ import Split from "react-split"
 import {nanoid} from "nanoid"
 
 export default function App() {
-    const [notes, setNotes] = React.useState([])
+   /**
+     * Challenge:
+     * 1. Every time the `notes` array changes, save it 
+     *    in localStorage. You'll need to use JSON.stringify()
+     *    to turn the array into a string to save in localStorage.
+     * 2. When the app first loads, initialize the notes state
+     *    with the notes saved in localStorage. You'll need to
+     *    use JSON.parse() to turn the stringified array back
+     *    into a real JS array.
+     */
+
+  const savedNote = JSON.stringify({ updateNote })
+
+  
+  
+  const prevSavedNote = JSON.parse(localStorage.getItem("savedNote"))
+
+    const [notes, setNotes] = React.useState(prevSavedNote || [])
     const [currentNoteId, setCurrentNoteId] = React.useState(
         (notes[0] && notes[0].id) || ""
     )
+  
+  React.useEffect(() => {
+    const savedNotes = JSON.stringify(notes)
+    localStorage.setItem("savedNote", savedNotes)
+  }, [notes])
+  
     
     function createNewNote() {
         const newNote = {
@@ -19,6 +42,9 @@ export default function App() {
         setNotes(prevNotes => [newNote, ...prevNotes])
         setCurrentNoteId(newNote.id)
     }
+  
+ 
+
     
     function updateNote(text) {
         setNotes(oldNotes => oldNotes.map(oldNote => {
@@ -34,6 +60,7 @@ export default function App() {
         }) || notes[0]
     }
     
+ 
     return (
         <main>
         {
@@ -55,7 +82,8 @@ export default function App() {
                     notes.length > 0 &&
                     <Editor 
                         currentNote={findCurrentNote()} 
-                        updateNote={updateNote} 
+                  updateNote={updateNote}
+             
                     />
                 }
             </Split>
