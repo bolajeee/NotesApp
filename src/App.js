@@ -35,18 +35,17 @@ export default function App() {
     function updateNote(text) {
 
         setNotes(oldNotes => {
-            let newNote = []
-            for (let i = 0; i < oldNotes.length; i++){
-                if (oldNotes[i].id === currentNoteId) {
-                newNote.unshift({...oldNotes[i], body: text})
+          const newArr = []
+            for (let i; i < oldNotes.length; i++){
+                const oldNote = oldNotes[i]
+                if (oldNote.id === currentNoteId) {
+                    return newArr.unshift({...oldNote, body: text})
                 } else {
-                    newNote.push(oldNotes)
+                    return newArr.push(oldNote)
+                }
             }
-            }
-            return newNote
-            
-        })
-
+            return newArr.push
+      })
 
 
         //not rearranging notes
