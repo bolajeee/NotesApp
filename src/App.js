@@ -5,18 +5,15 @@ import Split from "react-split";
 import { nanoid } from "nanoid";
 
 export default function App() {
-const prevSavedNote = localStorage.getItem("savedNote");
-if (prevSavedNote !== null) {
-    const userObject = JSON.parse(prevSavedNote);
-}
-
-
-  const [notes, setNotes] = React.useState((prevSavedNote)? prevSavedNote : []);
-  const [currentNoteId, setCurrentNoteId] = React.useState(
-        notes[0]?.id || ""
-    );
     
-    const currentNote = notes.find((note) => note.id === currentNoteId || note[0]);
+    const prevSavedNote = JSON.parse(localStorage.getItem("savedNote") || "[]");
+
+    const [notes, setNotes] = React.useState(Array.isArray(prevSavedNote) ? prevSavedNote : []);
+    const [currentNoteId, setCurrentNoteId] = React.useState(
+        prevSavedNote.length > 0 ? prevSavedNote[0].id : ""
+    );
+
+    const currentNote = currentNoteId ? notes.find((note) => note.id === currentNoteId) : null;
     
   React.useEffect(() => {
     const savedNotes = JSON.stringify(notes);
@@ -34,32 +31,32 @@ if (prevSavedNote !== null) {
 
   function updateNote(text, currentNote) {
     // Find the note with the same id as the current note
-    const currentNotee = notes.find((note) => note.id === currentNote.id);
+    // const currentNotee = notes.find((note) => note.id === currentNote.id);
 
     // Create a new note object with the updated body
-    const newNote = {
-      ...currentNotee,
-      body: text,
-    };
+    // const newNote = {
+    //   ...currentNotee,
+    //   body: text,
+    // };
 
     // Filter out the current note from the notes array
-    const filteredNotes = notes.filter((note) => note.id !== currentNote.id);
+    // const filteredNotes = notes.filter((note) => note.id !== currentNote.id);
 
     // Add the updated note back to the notes array
-    setNotes([...filteredNotes, newNote]);
+    // setNotes([...filteredNotes, newNote]);
 
-    // setNotes((oldNotes) => {
-    //   const newArr = [];
-    //   for (let i = 0; i < oldNotes.length; i++) {
-    //     const oldNote = oldNotes[i];
-    //     if (oldNote.id === currentNoteId) {
-    //        newArr.unshift({ ...oldNote, body: text });
-    //     } else {
-    //        newArr.push(oldNote);
-    //     }
-    //   }
-    //   return newArr;
-    // });
+    setNotes((oldNotes) => {
+      const newArr = [];
+      for (let i = 0; i < oldNotes.length; i++) {
+        const oldNote = oldNotes[i];
+        if (oldNote.id === currentNoteId) {
+           newArr.unshift({ ...oldNote, body: text });
+        } else {
+           newArr.push(oldNote);
+        }
+      }
+      return newArr;
+    });
 
     //not rearranging notes
 
@@ -73,9 +70,7 @@ if (prevSavedNote !== null) {
  
     function deleteNote(event, noteId) {
         event.stopPropagation() //doesnt allow event to be passed on to the parent element
-        setNotes((oldNote) => { oldNote.filter(note => note.id !== noteId)
-        })
-        
+        setNotes(oldNote =>{ oldNote.filter(note => note.id !== noteId)})    
     }
 
   return (
@@ -86,8 +81,8 @@ if (prevSavedNote !== null) {
             notes={notes}
             currentNote={currentNote}
             setCurrentNoteId={setCurrentNoteId}
-                      newNote={createNewNote}
-                      deleteNote={deleteNote}
+            newNote={createNewNote}
+            handleDelete={deleteNote}        
           />
           {currentNoteId && notes.length > 0 && (
             <Editor currentNote={currentNote} updateNote={updateNote} />
