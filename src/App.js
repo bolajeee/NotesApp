@@ -71,7 +71,14 @@ export default function App() {
         return note.id === currentNoteId;
       }) || notes[0]
     );
-  }
+    }
+    
+    function deleteNote(event, noteId) {
+        event.stopPropagation() //doesnt allow event to be passed on to the parent element
+        setNotes((oldNote) => { oldNote.filter(() => note.id !== noteId)
+        })
+        
+    }
 
   return (
     <main>
@@ -81,7 +88,8 @@ export default function App() {
             notes={notes}
             currentNote={findCurrentNote()}
             setCurrentNoteId={setCurrentNoteId}
-            newNote={createNewNote}
+                      newNote={createNewNote}
+                      deleteNote={deleteNote}
           />
           {currentNoteId && notes.length > 0 && (
             <Editor currentNote={findCurrentNote()} updateNote={updateNote} />
