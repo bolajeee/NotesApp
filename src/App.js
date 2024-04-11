@@ -68,9 +68,9 @@ export default function App() {
   }
 
  
-  function deleteNote(currentNote) {
+  function deleteNote(e, currentNote) {
     
-        // event.stopPropagation() //doesnt allow event to be passed on to the parent element
+    e.preventDefault() //doesnt allow event to be passed on to the parent element
     const deleteNote = notes.filter(note => note.id !== currentNote.id)
     setNotes([...deleteNote])  
     
