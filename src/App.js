@@ -2,31 +2,36 @@ import React from "react";
 import Sidebar from "./components/Sidebar";
 import Editor from "./components/Editor";
 import Split from "react-split";
-import { nanoid } from "nanoid";
+// import { nanoid } from "nanoid";
+import { addDoc, onSnapshot } from "firebase/firestore";
+import { noteCollection } from "./firebase";
+
 
 export default function App() {
     
-    const prevSavedNote = JSON.parse(localStorage.getItem("savedNote") || "[]");
-
-    const [notes, setNotes] = React.useState(Array.isArray(prevSavedNote) ? prevSavedNote : []);
-    const [currentNoteId, setCurrentNoteId] = React.useState(
-        prevSavedNote.length > 0 ? prevSavedNote[0].id : ""
-    );
+    const [notes, setNotes] = React.useState();
+    const [currentNoteId, setCurrentNoteId] = React.useState(savedNotesArr.id);
 
     const currentNote = currentNoteId ? notes.find((note) => note.id === currentNoteId) : null;
     
   React.useEffect(() => {
-    const savedNotes = JSON.stringify(notes);
-    localStorage.setItem("savedNote", savedNotes);
-  }, [notes]);
+    const unsubscribe = onSnapshot(noteCollection, function(snapshot) {
+      const savedNotesArr = snapshot.docs.map(docs => ({
+        ...docs.data,
+        id: docs.id
+      }))
+      setNotes(savedNotesArr)
+    })
+    return unsubscribe
+  }, []);
 
-  function createNewNote() {
+  async function createNewNote() {
     const newNote = {
-      id: nanoid(),
       body: "# Type your markdown note's title here",
     };
-    setNotes((prevNotes) => [newNote, ...prevNotes]);
-    setCurrentNoteId(newNote.id);
+    // setNotes((prevNotes) => [newNote, ...prevNotes]); prev because it was on local storage
+    const newNoteRef = await addDoc(noteCollection, newNote)
+    setCurrentNoteId(newNoteRef.id);
   }
 
   function updateNote(text, currentNote) {
