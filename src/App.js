@@ -9,11 +9,13 @@ import { noteCollection } from "./firebase";
 
 export default function App() {
     
-    const [notes, setNotes] = React.useState();
-    const [currentNoteId, setCurrentNoteId] = React.useState(savedNotesArr.id);
+   const [notes, setNotes] = React.useState([]);
+   const [currentNoteId, setCurrentNoteId] = React.useState((notes[0]?.id) || "");
 
-    const currentNote = currentNoteId ? notes.find((note) => note.id === currentNoteId) : null;
-    
+
+
+  const currentNote = currentNoteId ? notes.find((note) => note.id === currentNoteId) : null;
+ 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(noteCollection, function(snapshot) {
       const savedNotesArr = snapshot.docs.map(docs => ({
