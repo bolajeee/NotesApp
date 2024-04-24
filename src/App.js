@@ -3,8 +3,8 @@ import Sidebar from "./components/Sidebar";
 import Editor from "./components/Editor";
 import Split from "react-split";
 // import { nanoid } from "nanoid";
-import { addDoc, onSnapshot } from "firebase/firestore";
-import { noteCollection } from "./firebase";
+import { doc, addDoc, deleteDoc, onSnapshot } from "firebase/firestore";
+import { noteCollection, db } from "./firebase";
 
 
 export default function App() {
@@ -75,13 +75,9 @@ export default function App() {
   }
 
  
-  function deleteNote(e, currentNote) {
-    
-    e.preventDefault() //doesnt allow event to be passed on to the parent element
-    const deleteNote = notes.filter(note => note.id !== currentNote.id)
-    setNotes([...deleteNote])  
-    
-     
+  async function deleteNote(currentNote) {
+    const docRef = doc(db, "savedNotes", currentNote.id)
+    await deleteDoc(docRef)
     }
 
   return (
