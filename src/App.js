@@ -1,30 +1,34 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import Editor from "./components/Editor";
 import Split from "react-split";
 // import { nanoid } from "nanoid";
 import { doc, addDoc, deleteDoc, onSnapshot } from "firebase/firestore";
-import { noteCollection, db } from "./firebase";
-
+import { noteCollection, db } from "./config/firebase";
 
 export default function App() {
-    
-   const [notes, setNotes] = React.useState([]);
-   const [currentNoteId, setCurrentNoteId] = React.useState((notes[0]?.id) || "");
+  const [notes, setNotes] = React.useState([]);
+  const [currentNoteId, setCurrentNoteId] = React.useState("");
 
+  const currentNote = currentNoteId
+    ? notes.find((note) => note.id === currentNoteId)
+    : null;
 
+  useEffect(() => {
+    if (notes.length > 0) {
+      setCurrentNoteId(notes[0].id);
+    }
+  }, [notes]);
 
-  const currentNote = currentNoteId ? notes.find((note) => note.id === currentNoteId) : null;
- 
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(noteCollection, function(snapshot) {
-      const savedNotesArr = snapshot.docs.map(docs => ({
-        ...docs.data,
-        id: docs.id
-      }))
-      setNotes(savedNotesArr)
-    })
-    return unsubscribe
+    const unsubscribe = onSnapshot(noteCollection, function (snapshot) {
+      const savedNotesArr = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setNotes(savedNotesArr);
+    });
+    return unsubscribe;
   }, []);
 
   async function createNewNote() {
@@ -32,7 +36,7 @@ export default function App() {
       body: "# Type your markdown note's title here",
     };
     // setNotes((prevNotes) => [newNote, ...prevNotes]); prev because it was on local storage
-    const newNoteRef = await addDoc(noteCollection, newNote)
+    const newNoteRef = await addDoc(noteCollection, newNote);
     setCurrentNoteId(newNoteRef.id);
   }
 
@@ -57,9 +61,9 @@ export default function App() {
       for (let i = 0; i < oldNotes.length; i++) {
         const oldNote = oldNotes[i];
         if (oldNote.id === currentNoteId) {
-           newArr.unshift({ ...oldNote, body: text });
+          newArr.unshift({ ...oldNote, body: text });
         } else {
-           newArr.push(oldNote);
+          newArr.push(oldNote);
         }
       }
       return newArr;
@@ -74,11 +78,10 @@ export default function App() {
     // }))
   }
 
- 
-  async function deleteNote(currentNote) {
-    const docRef = doc(db, "savedNotes", currentNote.id)
-    await deleteDoc(docRef)
-    }
+  async function deleteNote(id) {
+    const docRef = doc(db, "savedNotes", id);
+    await deleteDoc(docRef);
+  }
 
   return (
     <main>
@@ -89,7 +92,7 @@ export default function App() {
             currentNote={currentNote}
             setCurrentNoteId={setCurrentNoteId}
             newNote={createNewNote}
-            handleDelete={deleteNote}        
+            handleDelete={deleteNote}
           />
           {currentNoteId && notes.length > 0 && (
             <Editor currentNote={currentNote} updateNote={updateNote} />
